@@ -20,3 +20,10 @@
 | **Scheduler** | Quartz.NET              |
 | **API Docs**  | Swagger / OpenAPI       |
 | **Testing**   | nUnit + Moq             |
+
+**Setup Instructions**
+1. **Clone the repository:**
+2. **Restore NuGet packages:**
+3. **Run the API:**
+4. **Access Swagger UI:**
+  
