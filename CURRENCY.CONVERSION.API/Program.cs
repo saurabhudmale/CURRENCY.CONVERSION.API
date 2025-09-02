@@ -6,9 +6,11 @@ using CURRENCY.CONVERSION.API.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Quartz;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,6 +47,22 @@ builder.Services.AddQuartz(q =>
 
 // Register Quartz hosted service
 builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+
+// Keep default console logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+// Configure Serilog only for MongoDB
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("System", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Quartz", Serilog.Events.LogEventLevel.Warning)
+    .CreateLogger();
+
+// Add Serilog to DI but DON'T override the default logger
+builder.Services.AddSingleton(Log.Logger);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

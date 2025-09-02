@@ -2,8 +2,9 @@
 using System.Threading.Tasks;
 using CURRENCY.CONVERSION.API.DTOs;
 using CURRENCY.CONVERSION.API.Interfaces;
-using Microsoft.AspNetCore.Http;
+using CURRENCY.CONVERSION.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
 namespace CURRENCY.CONVERSION.API.Controllers
 {
@@ -11,11 +12,18 @@ namespace CURRENCY.CONVERSION.API.Controllers
     [Route("api/[controller]")]
     public class CurrencyController : ControllerBase
     {
+        private readonly ILogger _serilog;
         private readonly ICurrencyService _currencyService;
         private readonly IConversionHistoryService _conversionHistoryService;
 
-        public CurrencyController(ICurrencyService currencyService, IConversionHistoryService conversionHistoryService)
+        public CurrencyController
+        (
+            ILogger serilog,
+            ICurrencyService currencyService, 
+            IConversionHistoryService conversionHistoryService
+        )
         {
+            _serilog = serilog;
             _currencyService = currencyService;
             _conversionHistoryService = conversionHistoryService;
         }
@@ -102,8 +110,8 @@ namespace CURRENCY.CONVERSION.API.Controllers
         [NonAction]
         private IActionResult ReturnError(Exception ex)
         {
-            Console.WriteLine(ex);
-            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            _serilog.Error(ex, ex.Message);
+            return StatusCode(500, "Internal Server Error");
         }
     }
 }

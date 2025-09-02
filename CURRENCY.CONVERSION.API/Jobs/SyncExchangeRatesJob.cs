@@ -2,15 +2,18 @@
 using System.Threading.Tasks;
 using CURRENCY.CONVERSION.API.Interfaces;
 using Quartz;
+using Serilog;
 
 namespace CURRENCY.CONVERSION.API.Jobs
 {
     public class SyncExchangeRatesJob : IJob
     {
+        private readonly ILogger _serilog;
         private readonly ISyncExchangeRatesService _syncExchangeRatesService;
 
-        public SyncExchangeRatesJob(ISyncExchangeRatesService syncExchangeRatesService)
+        public SyncExchangeRatesJob(ILogger serilog, ISyncExchangeRatesService syncExchangeRatesService)
         {
+            _serilog = serilog;
             _syncExchangeRatesService = syncExchangeRatesService;
         }
 
@@ -19,11 +22,12 @@ namespace CURRENCY.CONVERSION.API.Jobs
             try
             {
                 await _syncExchangeRatesService.SyncExchangeRatesAsync();
-                Console.WriteLine("Exchange Rates Syncing Completed");
+
+                _serilog.Information("Exchange rates syncing completed successfully");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error syncing exchange rates: " + ex.Message);
+                _serilog.Error(ex, ex.Message, "Error in syncing exchange rates");
             }
         }
     }
